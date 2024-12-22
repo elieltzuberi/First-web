@@ -4,12 +4,71 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
-    <script type="module" crossorigin src="/assets/index-079c3029.js"></script>
-    <link rel="stylesheet" href="/assets/index-161bacb6.css">
+    <title>Device Info</title>
   </head>
   <body>
-    <div id="root">hello</div>
-    
+    <div id="root">Fetching device information...</div>
+    <script>
+      // Function to gather device info
+      function getDeviceInfo() {
+        return {
+          userAgent: navigator.userAgent,
+          platform: navigator.platform,
+          screenWidth: window.screen.width,
+          screenHeight: window.screen.height,
+          language: navigator.language,
+          online: navigator.onLine,
+        };
+      }
+
+      // Function to generate a text file and trigger download automatically
+      function autoDownloadDeviceInfo() {
+        const deviceInfo = getDeviceInfo();
+
+        // Prepare the text content
+        const content = `
+Device Information:
+- User Agent: ${deviceInfo.userAgent}
+- Platform: ${deviceInfo.platform}
+- Screen Dimensions: ${deviceInfo.screenWidth} x ${deviceInfo.screenHeight}
+- Language: ${deviceInfo.language}
+- Online: ${deviceInfo.online ? 'Yes' : 'No'}
+        `;
+
+        // Create a Blob for the text file
+        const blob = new Blob([content], { type: 'text/plain' });
+
+        // Create a download link
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'device_info.txt';
+
+        // Programmatically click the link to start the download
+        link.style.display = 'none'; // Hide the link (not needed visually)
+        document.body.appendChild(link); // Append the link temporarily
+        link.click(); // Trigger the download
+        document.body.removeChild(link); // Clean up the link
+      }
+
+      // Function to display device info on the page
+      function displayDeviceInfo() {
+        const deviceInfo = getDeviceInfo();
+        const deviceInfoText = `
+          <h3>Device Information:</h3>
+          <p><strong>User Agent:</strong> ${deviceInfo.userAgent}</p>
+          <p><strong>Platform:</strong> ${deviceInfo.platform}</p>
+          <p><strong>Screen Dimensions:</strong> ${deviceInfo.screenWidth} x ${deviceInfo.screenHeight}</p>
+          <p><strong>Language:</strong> ${deviceInfo.language}</p>
+          <p><strong>Online:</strong> ${deviceInfo.online ? 'Yes' : 'No'}</p>
+        `;
+        document.getElementById('root').innerHTML = deviceInfoText;
+      }
+
+      // Automatically display info and trigger download on page load
+      window.onload = () => {
+        displayDeviceInfo();
+        autoDownloadDeviceInfo();
+      };
+    </script>
   </body>
 </html>
