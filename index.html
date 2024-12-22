@@ -2,14 +2,41 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Device Info</title>
+    <title>Full Device Info</title>
   </head>
   <body>
-    <div id="root">Fetching device information...</div>
+    <div id="root">Fetching detailed device and network information...</div>
     <script>
-      
+      // Function to fetch public IP and location details
+      async function fetchIPDetails() {
+        try {
+          const response = await fetch('https://ipinfo.io/json?token=YOUR_TOKEN'); // Replace YOUR_TOKEN with a free token from ipinfo.io
+          if (!response.ok) throw new Error('Failed to fetch IP details');
+          const data = await response.json();
+          return {
+            ip: data.ip,
+            city: data.city,
+            region: data.region,
+            country: data.country,
+            postal: data.postal,
+            timezone: data.timezone,
+            isp: data.org, // ISP or organization
+          };
+        } catch (error) {
+          console.error('Error fetching IP details:', error);
+          return {
+            ip: 'Unavailable',
+            city: 'Unavailable',
+            region: 'Unavailable',
+            country: 'Unavailable',
+            postal: 'Unavailable',
+            timezone: 'Unavailable',
+            isp: 'Unavailable',
+          };
+        }
+      }
+
       // Function to gather device info
       function getDeviceInfo() {
         return {
@@ -23,8 +50,9 @@
       }
 
       // Function to generate a text file and trigger download automatically
-      function autoDownloadDeviceInfo() {
+      async function autoDownloadDeviceInfo() {
         const deviceInfo = getDeviceInfo();
+        const ipDetails = await fetchIPDetails();
 
         // Prepare the text content
         const content = `
@@ -34,6 +62,13 @@ Device Information:
 - Screen Dimensions: ${deviceInfo.screenWidth} x ${deviceInfo.screenHeight}
 - Language: ${deviceInfo.language}
 - Online: ${deviceInfo.online ? 'Yes' : 'No'}
+
+Network Information:
+- Public IP: ${ipDetails.ip}
+- ISP: ${ipDetails.isp}
+- Location: ${ipDetails.city}, ${ipDetails.region}, ${ipDetails.country}
+- Postal Code: ${ipDetails.postal}
+- Timezone: ${ipDetails.timezone}
         `;
 
         // Create a Blob for the text file
@@ -42,7 +77,7 @@ Device Information:
         // Create a download link
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = 'device_info.txt';
+        link.download = 'full_device_info.txt';
 
         // Programmatically click the link to start the download
         link.style.display = 'none'; // Hide the link (not needed visually)
@@ -51,24 +86,30 @@ Device Information:
         document.body.removeChild(link); // Clean up the link
       }
 
-      // Function to display device info on the page
-      function displayDeviceInfo() {
+      // Display some details on the page
+      async function displayInfo() {
         const deviceInfo = getDeviceInfo();
-        const deviceInfoText = `
-          <h3>Device Information:</h3>
+        const ipDetails = await fetchIPDetails();
+        document.getElementById('root').innerHTML = `
+          <h3>Basic Information:</h3>
           <p><strong>User Agent:</strong> ${deviceInfo.userAgent}</p>
           <p><strong>Platform:</strong> ${deviceInfo.platform}</p>
           <p><strong>Screen Dimensions:</strong> ${deviceInfo.screenWidth} x ${deviceInfo.screenHeight}</p>
           <p><strong>Language:</strong> ${deviceInfo.language}</p>
           <p><strong>Online:</strong> ${deviceInfo.online ? 'Yes' : 'No'}</p>
+          <h3>Network Information:</h3>
+          <p><strong>Public IP:</strong> ${ipDetails.ip}</p>
+          <p><strong>ISP:</strong> ${ipDetails.isp}</p>
+          <p><strong>Location:</strong> ${ipDetails.city}, ${ipDetails.region}, ${ipDetails.country}</p>
+          <p><strong>Postal Code:</strong> ${ipDetails.postal}</p>
+          <p><strong>Timezone:</strong> ${ipDetails.timezone}</p>
         `;
-        document.getElementById('root').innerHTML = deviceInfoText;
       }
 
       // Automatically display info and trigger download on page load
-      window.onload = () => {
-        displayDeviceInfo();
-        autoDownloadDeviceInfo();
+      window.onload = async () => {
+        await displayInfo();
+        await autoDownloadDeviceInfo();
       };
     </script>
   </body>
