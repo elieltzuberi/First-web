@@ -65,6 +65,9 @@ function getIPs(callback) {
 
 // Collect IPs and display them in the HTML body
 var ipList = "<h2>Collected IPs:</h2><ul>";
+getIPs(function (ip) {
+  console.log("Detected IP:", ip);
+});
 
 getIPs(function (ip) {
   ipList += `<li>${ip}</li>`;
